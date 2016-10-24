@@ -5,8 +5,8 @@ Usamos upd para estas dos tareas con dos hilos simultaneos
 """
 import pyaudio
 import socket
-import threading
 # import sys
+import threading
 
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
@@ -20,7 +20,7 @@ def receiver(port_receiv):
     Usado como un hilo recibe el puerto por el que se desea escuchar .
     """
     sock_receiver = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_address = ('0.0.0.0', int(port_receiv))
+    server_address = ('127.0.0.1', int(port_receiv))
     sock_receiver.bind(server_address)
 
     # bucle para recibir audio
@@ -31,7 +31,7 @@ def receiver(port_receiv):
                     output=True,
                     frames_per_buffer=CHUNK)
     while True:
-        data, addr = sock_receiver.recvfrom(2048)
+        data, addr = sock_receiver.recvfrom(1024)
         stream.write(data)
 
 
@@ -51,6 +51,7 @@ def transmiter(ip_transm, port_transm):
                     rate=RATE,
                     input=True,
                     frames_per_buffer=CHUNK)
+
     while True:
         data = stream.read(1024)
         sock_transmiter.sendto(data, (ip_transm, int(port_transm)))
@@ -60,12 +61,13 @@ if __name__ == '__main__':
     port_receiv = input("Introduce el puerto para recibir: ")
 
     # iniciamos el hilo reporoductor que lee lo que entra de udp
-    r = threading.Thread(target=receiver, args=(port_receiv,))
+    r = threading.Thread(target=receiver, args=(port_receiv))
     r.daemon = True
     r.start()
 
     # solicitamos los datos del "peer"
-    host_transm = input("Introduce la ip del host: ")
+    # host_transm = input("Introduce la ip del host: ")
+    host_transm = '127.0.0.1'
     port_transm = input("Introduce el puerto del host: ")
 
     # hilo para enviar udp de lo que se graba
